@@ -38,7 +38,12 @@ jobs:
       - name: Generate native Android project
         run: npx expo prebuild --platform android --clean
 
+      - name: Disable Jetifier to avoid OOM in CI
+        run: echo "android.enableJetifier=false" >> android/gradle.properties
+
       - name: Build debug APK
+        env:
+          GRADLE_OPTS: "-Xmx4096m -XX:MaxMetaspaceSize=512m"
         run: cd android && ./gradlew app:assembleDebug --no-daemon
 
       - name: Upload APK artifact
