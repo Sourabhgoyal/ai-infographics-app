@@ -30,10 +30,10 @@ jobs:
           java-version: "17"
 
       - name: Setup Android SDK
-        uses: nativescript-community/setup-android@v1
-        with:
-          api-level: 34
-          build-tools: 34.0.0
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android platform and build-tools
+        run: yes | sdkmanager "platforms;android-34" "build-tools;34.0.0"
 
       - name: Generate native Android project
         run: npx expo prebuild --platform android --clean
