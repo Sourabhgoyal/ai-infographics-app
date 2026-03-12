@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -7,21 +7,28 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 
+import { ProgressContext } from './src/context/ProgressContext';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { FeedScreen } from './src/screens/FeedScreen';
 import { StatsScreen } from './src/screens/StatsScreen';
+import { QuizScreen } from './src/screens/QuizScreen';
 import { useProgress } from './src/hooks/useProgress';
 import { colors } from './src/theme/colors';
 
 SplashScreen.preventAutoHideAsync();
 
-export const ProgressContext = createContext(null);
-
 const Tab = createBottomTabNavigator();
 
 const navTheme = {
   ...DefaultTheme,
-  colors: { ...DefaultTheme.colors, background: colors.bg },
+  colors: {
+    ...DefaultTheme.colors,
+    background: colors.bg,
+    primary: colors.accent,
+    text: colors.text,
+    border: colors.border,
+    card: colors.bgCard,
+  },
 };
 
 function TabIcon({ emoji, focused }) {
@@ -49,7 +56,7 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <ProgressContext.Provider value={progress}>
-          <StatusBar style="light" />
+          <StatusBar style="dark" />
           <NavigationContainer theme={navTheme}>
             <Tab.Navigator
               screenOptions={{
@@ -61,10 +68,12 @@ export default function App() {
                   height: 70,
                   paddingBottom: 12,
                   paddingTop: 6,
+                  elevation: 0,
+                  shadowOpacity: 0,
                 },
                 tabBarActiveTintColor: colors.accent,
                 tabBarInactiveTintColor: colors.textMuted,
-                tabBarLabelStyle: { fontSize: 11, fontWeight: '700', letterSpacing: 0.3 },
+                tabBarLabelStyle: { fontSize: 12, fontWeight: '600', letterSpacing: 0.5 },
               }}
             >
               <Tab.Screen
@@ -80,6 +89,14 @@ export default function App() {
                 options={{
                   tabBarIcon: ({ focused }) => <TabIcon emoji="📖" focused={focused} />,
                   tabBarLabel: 'Read',
+                }}
+              />
+              <Tab.Screen
+                name="Quiz"
+                component={QuizScreen}
+                options={{
+                  tabBarIcon: ({ focused }) => <TabIcon emoji="✏️" focused={focused} />,
+                  tabBarLabel: 'Quiz',
                 }}
               />
               <Tab.Screen

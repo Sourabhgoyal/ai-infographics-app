@@ -3,10 +3,11 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, StatusBar,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as Haptics from 'expo-haptics';
+import { hapticNotification, Haptics } from '../utils/haptics';
 import { INFOGRAPHICS, CATEGORIES, TOTAL_COUNT } from '../data/infographics';
 import { colors, categoryColors, categoryIcons } from '../theme/colors';
-import { ProgressContext } from '../../App';
+import { typography } from '../theme/typography';
+import { ProgressContext } from '../context/ProgressContext';
 
 const imagesByCategory = CATEGORIES.map((cat) =>
   INFOGRAPHICS.filter((img) => img.catIdx === cat.id)
@@ -24,7 +25,7 @@ export function StatsScreen() {
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Reset', style: 'destructive', onPress: () => {
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+            hapticNotification(Haptics.NotificationFeedbackType.Warning);
             resetAll();
           },
         },
@@ -34,25 +35,25 @@ export function StatsScreen() {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.bg} />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.bg} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-        <Text style={styles.title}>Your Stats</Text>
+        <Text style={[styles.title, typography.headlineLarge]}>Your Stats</Text>
 
         {/* Summary card */}
         <View style={styles.summaryCard}>
           <View style={styles.statBlock}>
-            <Text style={styles.bigNum}>{readCount}</Text>
-            <Text style={styles.bigLabel}>Read</Text>
+            <Text style={[styles.bigNum, typography.headlineMedium]}>{readCount}</Text>
+            <Text style={[styles.bigLabel, typography.labelMedium]}>Read</Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.statBlock}>
-            <Text style={styles.bigNum}>{TOTAL_COUNT - readCount}</Text>
-            <Text style={styles.bigLabel}>Remaining</Text>
+            <Text style={[styles.bigNum, typography.headlineMedium]}>{TOTAL_COUNT - readCount}</Text>
+            <Text style={[styles.bigLabel, typography.labelMedium]}>Remaining</Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.statBlock}>
-            <Text style={[styles.bigNum, { color: colors.accent }]}>{percentage}%</Text>
-            <Text style={styles.bigLabel}>Done</Text>
+            <Text style={[styles.bigNum, typography.headlineMedium, { color: colors.accent }]}>{percentage}%</Text>
+            <Text style={[styles.bigLabel, typography.labelMedium]}>Done</Text>
           </View>
         </View>
 
@@ -62,7 +63,7 @@ export function StatsScreen() {
         </View>
 
         {/* Category breakdown */}
-        <Text style={styles.sectionTitle}>By Topic</Text>
+        <Text style={[styles.sectionTitle, typography.titleMedium]}>By Topic</Text>
         {CATEGORIES.map((cat, i) => {
           const catImages = imagesByCategory[i];
           const read = catImages.filter((img) => readSet.has(img.id)).length;
@@ -78,7 +79,7 @@ export function StatsScreen() {
               <Text style={styles.catIcon}>{icon}</Text>
               <View style={styles.catInfo}>
                 <View style={styles.catHeader}>
-                  <Text style={styles.catName}>{cat.name}</Text>
+                  <Text style={[styles.catName, typography.labelLarge]}>{cat.name}</Text>
                   <Text style={[styles.catPct, { color: done ? colors.success : color }]}>
                     {done ? '✓ Done' : `${pct}%`}
                   </Text>
@@ -86,7 +87,7 @@ export function StatsScreen() {
                 <View style={styles.catTrack}>
                   <View style={[styles.catFill, { width: `${pct}%`, backgroundColor: color }]} />
                 </View>
-                <Text style={styles.catCount}>{read} of {total} viewed</Text>
+                <Text style={[styles.catCount, typography.labelMedium]}>{read} of {total} viewed</Text>
               </View>
             </View>
           );
@@ -94,7 +95,7 @@ export function StatsScreen() {
 
         {/* Reset button */}
         <TouchableOpacity style={styles.resetBtn} onPress={handleReset} activeOpacity={0.75}>
-          <Text style={styles.resetText}>↺  Reset All Progress</Text>
+          <Text style={[styles.resetText, typography.labelLarge]}>↺  Reset All Progress</Text>
         </TouchableOpacity>
         <View style={{ height: 40 }} />
       </ScrollView>
@@ -106,8 +107,6 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   scroll: { padding: 20 },
   title: {
-    fontSize: 30,
-    fontWeight: '800',
     color: colors.text,
     letterSpacing: -0.5,
     marginBottom: 20,
@@ -115,7 +114,7 @@ const styles = StyleSheet.create({
   summaryCard: {
     flexDirection: 'row',
     backgroundColor: colors.bgCard,
-    borderRadius: 20,
+    borderRadius: 16,
     padding: 24,
     borderWidth: 1,
     borderColor: colors.border,
@@ -125,15 +124,11 @@ const styles = StyleSheet.create({
   },
   statBlock: { alignItems: 'center', flex: 1 },
   bigNum: {
-    fontSize: 34,
-    fontWeight: '800',
     color: colors.text,
   },
   bigLabel: {
-    fontSize: 12,
     color: colors.textSecondary,
     marginTop: 2,
-    fontWeight: '500',
   },
   divider: {
     width: 1,
@@ -142,7 +137,7 @@ const styles = StyleSheet.create({
   },
   overallTrack: {
     height: 6,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: colors.border,
     borderRadius: 3,
     overflow: 'hidden',
     marginBottom: 32,
@@ -153,8 +148,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '800',
     color: colors.text,
     marginBottom: 16,
   },
@@ -162,7 +155,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     backgroundColor: colors.bgCard,
-    borderRadius: 14,
+    borderRadius: 12,
     padding: 14,
     marginBottom: 10,
     borderWidth: 1,
@@ -170,7 +163,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   catRowDone: {
-    borderColor: 'rgba(74, 222, 128, 0.25)',
+    borderColor: colors.successDim,
   },
   catDot: {
     width: 4,
@@ -196,28 +189,26 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 8,
   },
-  catPct: { fontSize: 13, fontWeight: '800' },
+  catPct: { fontWeight: '600' },
   catTrack: {
     height: 4,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: colors.border,
     borderRadius: 2,
     overflow: 'hidden',
     marginBottom: 6,
   },
   catFill: { height: 4, borderRadius: 2 },
-  catCount: { fontSize: 11, color: colors.textMuted },
+  catCount: { color: colors.textMuted },
   resetBtn: {
     marginTop: 32,
-    borderRadius: 14,
+    borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255, 100, 100, 0.3)',
-    backgroundColor: 'rgba(255, 100, 100, 0.07)',
+    borderColor: colors.error,
+    backgroundColor: 'rgba(198, 40, 40, 0.08)',
   },
   resetText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#FF6B6B',
+    color: colors.error,
   },
 });

@@ -1,41 +1,38 @@
+/**
+ * Material Design theme – primary orange, light surfaces
+ * https://m3.material.io/styles/color/roles
+ */
 export const colors = {
-  bg: '#0A0A14',
-  bgCard: '#12121E',
-  bgSurface: '#1A1A2E',
-  accent: '#7C6FFF',
-  accentLight: '#9D94FF',
-  accentDim: 'rgba(124, 111, 255, 0.2)',
-  success: '#4ADE80',
-  successDim: 'rgba(74, 222, 128, 0.15)',
-  warning: '#FBBF24',
-  text: '#FFFFFF',
-  textSecondary: '#A0A0C0',
-  textMuted: '#606080',
-  border: 'rgba(255,255,255,0.08)',
-  overlay: 'rgba(10,10,20,0.85)',
+  // Surfaces (majorly white)
+  bg: '#FAFAFA',
+  bgCard: '#FFFFFF',
+  bgSurface: '#F5F5F5',
+  // Primary – Material Orange
+  accent: '#FF9800',
+  accentLight: '#FFB74D',
+  accentDim: 'rgba(255, 152, 0, 0.12)',
+  onPrimary: '#FFFFFF',
+  // Semantic
+  success: '#2E7D32',
+  successDim: 'rgba(46, 125, 50, 0.12)',
+  warning: '#F57C00',
+  error: '#C62828',
+  // Text on light background
+  text: 'rgba(0, 0, 0, 0.87)',
+  textSecondary: 'rgba(0, 0, 0, 0.6)',
+  textMuted: 'rgba(0, 0, 0, 0.38)',
+  textOnPrimary: '#FFFFFF',
+  // Borders & dividers
+  border: 'rgba(0, 0, 0, 0.12)',
+  outline: 'rgba(0, 0, 0, 0.12)',
+  overlay: 'rgba(0, 0, 0, 0.32)',
 };
 
 export const categoryColors = [
-  '#FF6B6B',  // 01 RAG & LLM Agents
-  '#7C6FFF',  // 02 MCP & RAG Agents
-  '#4ECDC4',  // 03 Transformer vs MoE
-  '#45B7D1',  // 04 LLM Fine-Tuning
-  '#6BCB77',  // 05 RAG vs Agentic RAG
-  '#FFD93D',  // 06 Agentic Patterns
-  '#FF9FF3',  // 07 Chunking Strategies
-  '#54A0FF',  // 08 Levels of Agentic AI
-  '#A29BFE',  // 09 KV Caching
-  '#00CEC9',  // 10 Graph RAG
-  '#FF9F43',  // 11 Function Calling & MCP
-  '#B2C8D5',  // 12 LLM Training Stages
-  '#FF7675',  // 13 Reasoning Prompting
-  '#0097CC',  // 14 Knowledge Distillation
-  '#C56AF0',  // 15 Reinforcement Fine-Tuning
-  '#E17055',  // 16 Vector Databases
-  '#26C6DA',  // 17 LLM Quantization
-  '#EF5350',  // 18 Prompt Engineering
-  '#66BB6A',  // 19 Agent Memory
-  '#F48FB1',  // 20 LLM Evaluation
+  '#E53935', '#D84315', '#EF6C00', '#F9A825', '#7CB342',
+  '#00897B', '#00ACC1', '#5C6BC0', '#8E24AA', '#EC407A',
+  '#FF9800', '#43A047', '#1E88E5', '#FB8C00', '#AB47BC',
+  '#26A69A', '#42A5F5', '#66BB6A', '#5C6BC0', '#EF5350',
 ];
 
 export const categoryIcons = [

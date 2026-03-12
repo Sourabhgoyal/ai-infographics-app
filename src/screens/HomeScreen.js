@@ -1,14 +1,15 @@
 import React, { useContext, useCallback } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
-  Dimensions, StatusBar,
+  Dimensions, StatusBar, Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as Haptics from 'expo-haptics';
+import { hapticImpact, Haptics } from '../utils/haptics';
 import { CircularProgress } from '../components/CircularProgress';
 import { INFOGRAPHICS, CATEGORIES, TOTAL_COUNT } from '../data/infographics';
 import { colors, categoryColors, categoryIcons } from '../theme/colors';
-import { ProgressContext } from '../../App';
+import { typography } from '../theme/typography';
+import { ProgressContext } from '../context/ProgressContext';
 
 const { width: W } = Dimensions.get('window');
 const CARD_W = (W - 48) / 2;
@@ -26,14 +27,14 @@ export function HomeScreen({ navigation }) {
     // Find first unread infographic
     const firstUnread = INFOGRAPHICS.find((img) => !readSet.has(img.id));
     const startIndex = firstUnread ? firstUnread.id : 0;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    hapticImpact(Haptics.ImpactFeedbackStyle.Medium);
     navigation.navigate('Feed', { startIndex });
   }, [readSet, navigation]);
 
   const handleCategoryPress = useCallback((catImages) => {
     if (catImages.length === 0) return;
     const firstUnread = catImages.find((img) => !readSet.has(img.id)) ?? catImages[0];
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    hapticImpact(Haptics.ImpactFeedbackStyle.Light);
     navigation.navigate('Feed', { startIndex: firstUnread.id });
   }, [readSet, navigation]);
 
@@ -41,37 +42,37 @@ export function HomeScreen({ navigation }) {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.bg} />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.bg} />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scroll}
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>AI Infographics</Text>
-          <Text style={styles.subtitle}>Daily Dose of Data Science</Text>
+          <Text style={[styles.title, typography.headlineLarge]}>AI Infographics</Text>
+          <Text style={[styles.subtitle, typography.bodyMedium]}>Daily Dose of Data Science</Text>
         </View>
 
         {/* Progress ring */}
         <View style={styles.ringContainer}>
           <CircularProgress size={180} percentage={percentage} strokeWidth={14} />
-          <Text style={styles.statsText}>
+          <Text style={[styles.statsText, typography.bodyMedium]}>
             {readCount} of {TOTAL_COUNT} infographics read
           </Text>
           {allDone && (
-            <Text style={styles.congrats}>🎉 You've completed everything!</Text>
+            <Text style={[styles.congrats, typography.labelLarge]}>🎉 You've completed everything!</Text>
           )}
         </View>
 
         {/* CTA button */}
         <TouchableOpacity style={styles.ctaBtn} onPress={handleContinue} activeOpacity={0.85}>
-          <Text style={styles.ctaBtnText}>
+          <Text style={[styles.ctaBtnText, typography.labelLarge]}>
             {readCount === 0 ? '🚀  Start Reading' : allDone ? '🔄  Review All' : '▶  Continue Reading'}
           </Text>
         </TouchableOpacity>
 
         {/* Category grid */}
-        <Text style={styles.sectionTitle}>Topics</Text>
+        <Text style={[styles.sectionTitle, typography.titleMedium]}>Topics</Text>
         <View style={styles.grid}>
           {CATEGORIES.map((cat, i) => {
             const catImages = imagesByCategory[i];
@@ -91,7 +92,7 @@ export function HomeScreen({ navigation }) {
                 <View style={[styles.catIconBg, { backgroundColor: color + '22' }]}>
                   <Text style={styles.catIcon}>{icon}</Text>
                 </View>
-                <Text style={styles.catName} numberOfLines={2}>{cat.name}</Text>
+                <Text style={[styles.catName, typography.labelMedium]} numberOfLines={2}>{cat.name}</Text>
                 <View style={styles.catMeta}>
                   <Text style={[styles.catPct, { color }]}>{pct}%</Text>
                   <Text style={styles.catCount}>{read}/{total}</Text>
@@ -117,13 +118,10 @@ const styles = StyleSheet.create({
   scroll: { paddingHorizontal: 20, paddingBottom: 20 },
   header: { marginTop: 12, marginBottom: 28 },
   title: {
-    fontSize: 30,
-    fontWeight: '800',
     color: colors.text,
     letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 14,
     color: colors.textSecondary,
     marginTop: 4,
   },
@@ -132,43 +130,39 @@ const styles = StyleSheet.create({
     marginBottom: 28,
     paddingVertical: 24,
     backgroundColor: colors.bgCard,
-    borderRadius: 24,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: colors.border,
   },
   statsText: {
     marginTop: 16,
-    fontSize: 15,
     color: colors.textSecondary,
-    fontWeight: '500',
   },
   congrats: {
     marginTop: 8,
-    fontSize: 15,
     color: colors.success,
-    fontWeight: '700',
   },
   ctaBtn: {
     backgroundColor: colors.accent,
-    borderRadius: 16,
+    borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
     marginBottom: 32,
-    shadowColor: colors.accent,
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 8,
+    elevation: 2,
+    ...(Platform.OS === 'web'
+      ? { boxShadow: `0 2px 8px ${colors.accent}66` }
+      : {
+          shadowColor: colors.accent,
+          shadowOpacity: 0.35,
+          shadowRadius: 8,
+          shadowOffset: { width: 0, height: 2 },
+        }),
   },
   ctaBtnText: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: '#fff',
-    letterSpacing: 0.3,
+    color: colors.textOnPrimary,
+    letterSpacing: 0.5,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '800',
     color: colors.text,
     marginBottom: 16,
   },
@@ -180,15 +174,15 @@ const styles = StyleSheet.create({
   catCard: {
     width: CARD_W,
     backgroundColor: colors.bgCard,
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 14,
     borderWidth: 1,
     borderColor: colors.border,
     overflow: 'hidden',
   },
   catCardDone: {
-    borderColor: 'rgba(74, 222, 128, 0.25)',
-    backgroundColor: 'rgba(74, 222, 128, 0.05)',
+    borderColor: colors.successDim,
+    backgroundColor: 'rgba(46, 125, 50, 0.06)',
   },
   catIconBg: {
     width: 40,
@@ -200,8 +194,6 @@ const styles = StyleSheet.create({
   },
   catIcon: { fontSize: 20 },
   catName: {
-    fontSize: 13,
-    fontWeight: '700',
     color: colors.text,
     marginBottom: 8,
     lineHeight: 18,
@@ -213,11 +205,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 6,
   },
-  catPct: { fontSize: 14, fontWeight: '800' },
+  catPct: { fontSize: 14, fontWeight: '600' },
   catCount: { fontSize: 11, color: colors.textMuted },
   miniTrack: {
     height: 3,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: colors.border,
     borderRadius: 2,
     overflow: 'hidden',
   },
@@ -228,6 +220,6 @@ const styles = StyleSheet.create({
     right: 12,
     fontSize: 16,
     color: colors.success,
-    fontWeight: '800',
+    fontWeight: '600',
   },
 });

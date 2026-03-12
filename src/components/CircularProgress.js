@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { colors } from '../theme/colors';
+import { typography } from '../theme/typography';
 
 export function CircularProgress({ size = 160, percentage = 0, strokeWidth = 12 }) {
   const radius = (size - strokeWidth) / 2;
@@ -15,14 +16,14 @@ export function CircularProgress({ size = 160, percentage = 0, strokeWidth = 12 
       <Svg width={size} height={size} style={StyleSheet.absoluteFill}>
         <Defs>
           <LinearGradient id="progressGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <Stop offset="0%" stopColor="#7C6FFF" />
-            <Stop offset="100%" stopColor="#4ECDC4" />
+            <Stop offset="0%" stopColor={colors.accent} />
+            <Stop offset="100%" stopColor={colors.accentLight} />
           </LinearGradient>
         </Defs>
         {/* Track */}
         <Circle
           cx={center} cy={center} r={radius}
-          stroke="rgba(255,255,255,0.08)"
+          stroke={colors.border}
           strokeWidth={strokeWidth}
           fill="none"
         />
@@ -40,8 +41,8 @@ export function CircularProgress({ size = 160, percentage = 0, strokeWidth = 12 
         />
       </Svg>
       <View style={styles.label}>
-        <Text style={styles.percentText}>{percentage}%</Text>
-        <Text style={styles.doneText}>complete</Text>
+        <Text style={[styles.percentText, typography.headlineLarge]}>{percentage}%</Text>
+        <Text style={[styles.doneText, typography.labelMedium]}>complete</Text>
       </View>
     </View>
   );
@@ -50,13 +51,10 @@ export function CircularProgress({ size = 160, percentage = 0, strokeWidth = 12 
 const styles = StyleSheet.create({
   label: { alignItems: 'center' },
   percentText: {
-    fontSize: 36,
-    fontWeight: '800',
     color: colors.text,
     letterSpacing: -1,
   },
   doneText: {
-    fontSize: 13,
     color: colors.textSecondary,
     marginTop: -2,
   },

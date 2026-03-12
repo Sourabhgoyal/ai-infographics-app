@@ -1,14 +1,13 @@
-import React, { useCallback, useRef, useState, useContext, useEffect } from 'react';
+import React, { useCallback, useRef, useState, useContext } from 'react';
 import {
   View, FlatList, StyleSheet, Dimensions, StatusBar, Text, TouchableOpacity,
 } from 'react-native';
-import * as Haptics from 'expo-haptics';
+import { hapticImpact, Haptics } from '../utils/haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { InfographicCard } from '../components/InfographicCard';
 import { INFOGRAPHICS, TOTAL_COUNT } from '../data/infographics';
-import { useProgress } from '../hooks/useProgress';
 import { colors, categoryColors } from '../theme/colors';
-import { ProgressContext } from '../../App';
+import { ProgressContext } from '../context/ProgressContext';
 
 const { height: H, width: W } = Dimensions.get('window');
 
@@ -19,17 +18,13 @@ export function FeedScreen({ route }) {
   const insets = useSafeAreaInsets();
   const timerRef = useRef(null);
   const listRef = useRef(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Jump to specific index if passed from Home
-  const startIndex = route?.params?.startIndex ?? 0;
-  useEffect(() => {
-    if (startIndex > 0 && listRef.current) {
-      setTimeout(() => {
-        listRef.current?.scrollToIndex({ index: startIndex, animated: false });
-      }, 300);
-    }
-  }, [startIndex]);
+  // Start at specific index when navigating from Home (e.g. "Continue Reading")
+  const startIndex = Math.min(
+    Math.max(0, route?.params?.startIndex ?? 0),
+    INFOGRAPHICS.length - 1
+  );
+  const [currentIndex, setCurrentIndex] = useState(startIndex);
 
   const onViewableItemsChanged = useCallback(({ viewableItems }) => {
     if (viewableItems.length === 0) return;
@@ -44,10 +39,17 @@ export function FeedScreen({ route }) {
       // Auto-mark read after threshold
       timerRef.current = setTimeout(() => {
         markRead(item.id);
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        hapticImpact(Haptics.ImpactFeedbackStyle.Light);
       }, READ_THRESHOLD_MS);
     }
   }, [readSet, markRead]);
+
+  // FlatList requires a stable reference; ref prevents "Changing onViewableItemsChanged on the fly" crash
+  const onViewableItemsChangedRef = useRef(onViewableItemsChanged);
+  onViewableItemsChangedRef.current = onViewableItemsChanged;
+  const stableOnViewableItemsChanged = useCallback((info) => {
+    onViewableItemsChangedRef.current?.(info);
+  }, []);
 
   const viewabilityConfig = useRef({
     itemVisiblePercentThreshold: 75,
@@ -59,11 +61,11 @@ export function FeedScreen({ route }) {
       isRead={readSet.has(item.id)}
       onMarkRead={(id) => {
         markRead(id);
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        hapticImpact(Haptics.ImpactFeedbackStyle.Light);
       }}
       onMarkUnread={(id) => {
         markUnread(id);
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
+        hapticImpact(Haptics.ImpactFeedbackStyle.Soft);
       }}
     />
   ), [readSet, markRead, markUnread]);
@@ -92,13 +94,14 @@ export function FeedScreen({ route }) {
         snapToInterval={H}
         snapToAlignment="start"
         decelerationRate="fast"
-        onViewableItemsChanged={onViewableItemsChanged}
+        onViewableItemsChanged={stableOnViewableItemsChanged}
         viewabilityConfig={viewabilityConfig}
         getItemLayout={getItemLayout}
+        initialScrollIndex={startIndex > 0 ? startIndex : undefined}
         initialNumToRender={3}
         maxToRenderPerBatch={4}
         windowSize={7}
-        removeClippedSubviews
+        removeClippedSubviews={false}
       />
 
       {/* Bottom progress bar */}
@@ -124,7 +127,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 3,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: colors.border,
   },
   progressBarFill: {
     height: 3,
@@ -133,12 +136,12 @@ const styles = StyleSheet.create({
   pill: {
     position: 'absolute',
     alignSelf: 'center',
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(0,0,0,0.06)',
     paddingHorizontal: 14,
-    paddingVertical: 5,
+    paddingVertical: 6,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: colors.border,
   },
   pillText: {
     color: colors.textSecondary,
